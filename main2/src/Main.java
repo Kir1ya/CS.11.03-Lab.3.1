@@ -8,14 +8,7 @@ class StarCraftGame {
     private String race = "";
     private int turn = 0;
     private int barracksCount = 0;
-    private int healthZergling = 30;
-    private int attackZergling = 3;
-    private int healthMarine = 50;
-    private int attackMarine = 5;
-    private int healthZealot = 80;
-    private int attackZealot = 8;
-    private int healthEnemy = 40;
-    private int enemyAttack = 4;
+
     public static void main(String[] args) {
         StarCraftGame game = new StarCraftGame();
         Scanner userInput = new Scanner(System.in);
@@ -75,9 +68,13 @@ class StarCraftGame {
                 System.out.println("You mined " + minedMinerals + " minerals.");
                 break;
             case 2:
-                if (minerals >= 30) {
+                if ((minerals >= 30) && (barracksCount == 0)) {
                     trainUnits();
-                } else {
+                }
+                else if ((minerals >= 30) && (barracksCount == 1)) {
+                    trainUnits2();
+                }
+                else {
                     System.out.println("Not enough minerals to train units.");
                 }
                 break;
@@ -90,7 +87,6 @@ class StarCraftGame {
                 break;
             case 4:
                 if (armySize > 0) {
-                    int enemyStrength = random.nextInt(50) + 30;
                     battle(1);
                 } else {
                     System.out.println("You need an army to attack.");
@@ -105,7 +101,7 @@ class StarCraftGame {
         Random random = new Random();
 
         if ("Terran".equalsIgnoreCase(race)) {
-            int marines = random.nextInt(8) + 3;
+            int marines = random.nextInt(7) + 3;
             armySize += marines;
             minerals -= 30;
             System.out.println("Trained " + marines + " Marines.");
@@ -115,20 +111,41 @@ class StarCraftGame {
             minerals -= 30;
             System.out.println("Warped in " + zealots + " Zealots.");
         } else if ("Zerg".equalsIgnoreCase(race)) {
-            int zerglings = random.nextInt(10) + 2;
+            int zerglings = random.nextInt(9) + 2;
             armySize += zerglings;
             minerals -= 30;
             System.out.println("Hatched " + zerglings + " Zerglings.");
         }
     }
+    private void trainUnits2() {
+        Random random = new Random();
+        if (barracksCount == 1) {
+            if ("Terran".equalsIgnoreCase(race)) {
+                int marines = random.nextInt(8) + 3;
+                armySize += marines;
+                minerals -= 30;
+                System.out.println("Trained " + marines + " Marines.");
+            } else if ("Protoss".equalsIgnoreCase(race)) {
+                int zealots = random.nextInt(5) + 2;
+                armySize += zealots;
+                minerals -= 30;
+                System.out.println("Warped in " + zealots + " Zealots.");
+            } else if ("Zerg".equalsIgnoreCase(race)) {
+                int zerglings = random.nextInt(10) + 2;
+                armySize += zerglings;
+                minerals -= 30;
+                System.out.println("Hatched " + zerglings + " Zerglings.");
+            }
+        }
+    }
 
     private void buildBuilding() {
-        Random random = new Random();
-        int buildingChoice = random.nextInt(3) + 1;
         if (minerals >= 50) {
             System.out.print("Building a ");
             System.out.println("Barracks...");
+            System.out.println("Troop production count is increased.");
             minerals -= 50;
+            barracksCount ++;
         } else {
             System.out.println("Not enough minerals to build a building.");
         }
@@ -139,20 +156,27 @@ class StarCraftGame {
         int yourStrength = 0;
         int enemyStrength = (int) ((enemyArmySize + random.nextInt(20) - 10) * enemyAttackMultiplier);
         if ("Terran".equalsIgnoreCase(race)) {
+            int attackMarine = 5;
             yourStrength = (armySize * attackMarine) + random.nextInt(15) - 5;
-            armySize -= enemyStrength/healthMarine;
+            int healthMarine = 50;
+            armySize -= enemyStrength/ healthMarine;
         }
         else if ("Protoss".equalsIgnoreCase(race)) {
+            int attackZealot = 8;
             yourStrength = (armySize * attackZealot) + random.nextInt(24) - 4;
-            armySize -= enemyStrength/healthZealot;
+            int healthZealot = 80;
+            armySize -= enemyStrength/ healthZealot;
         }
         else if ("Zerg".equalsIgnoreCase(race)) {
+            int attackZergling = 3;
             yourStrength = (armySize * attackZergling) + random.nextInt(9) - 3;
+            int healthZergling = 30;
             armySize -= enemyStrength / healthZergling;
         }
-        enemyArmySize -= yourStrength/healthEnemy;
+        int healthEnemy = 40;
+        enemyArmySize -= yourStrength/ healthEnemy;
 
-        if (armySize >= 0) {
+        if ((enemyArmySize >= 0) && (turn != 3)) {
             System.out.println("Victory! You live another day.");
         } else {
             System.out.println("Skill issue :skull:.");
@@ -178,17 +202,13 @@ class StarCraftGame {
                 System.out.println("AI attempted to mine minerals but failed.");
             }
         } else if (enemyAction == 2) {
-            if (true) {
-                int enemyArmyGrowth = random.nextInt(10) + 5;
-                enemyArmySize += enemyArmyGrowth;
-                System.out.println("AI trained " + enemyArmyGrowth + " units.");
-            } else {
-                System.out.println("AI attempted to train units but failed.");
-            }
+            int enemyArmyGrowth = random.nextInt(10) + 5;
+            enemyArmySize += enemyArmyGrowth;
+            System.out.println("AI trained " + enemyArmyGrowth + " units.");
         } else if (enemyAction == 3) {
             if (chance < 40) {
                 int enemyBuildingChoice = random.nextInt(3) + 1;
-                buildEnemyBuilding(enemyBuildingChoice);
+                buildEnemyBuilding();
             } else {
                 System.out.println("AI attempted to build a building but failed.");
             }
@@ -197,7 +217,7 @@ class StarCraftGame {
         }
     }
 
-    private void buildEnemyBuilding(int buildingChoice) {
+    private void buildEnemyBuilding() {
         Random random = new Random();
 
         if (minerals >= 50 && Math.random() > 0.5) {
